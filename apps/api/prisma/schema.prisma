@@ -9,9 +9,10 @@ generator client {
   moduleFormat = "cjs"
 }
 
+
 generator typescript {
   provider = "prisma-generator-typescript-interfaces"
-  output   = "../../packages/types/src/dto/generated"
+  output   = "../../packages/types/src/dto/generated.ts"
 }
 
 

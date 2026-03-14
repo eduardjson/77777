@@ -28,6 +28,7 @@
     "dev": "nest start --watch"
   },
   "dependencies": {
+    "@repo/types": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",

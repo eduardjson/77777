@@ -13,7 +13,13 @@
     "dev:api": "turbo dev --filter=@repo/api",
     "dev:web": "turbo dev --filter=@repo/web",
     "db:generate": "turbo generate --filter=@repo/api",
-    "db:migrate": "npm run migrate:dev --workspace=@repo/api"
+    "db:migrate": "turbo migrate:dev --filter=@repo/api",
+    "db:studio": "turbo db:studio --filter=@repo/api",
+    "db:seed": "turbo db:seed --filter=@repo/api",
+    "build:api": "turbo build --filter=@repo/api",
+    "build:web": "turbo build --filter=@repo/web",
+    "lint:api": "turbo lint --filter=@repo/api",
+    "lint:web": "turbo lint --filter=@repo/web"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.57.0",

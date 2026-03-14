@@ -8,10 +8,11 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "build": "vite build",
     "dev": "vite",
-    "format:check": "prettier --check .",
-    "lint:fix": "eslint --fix .",
+    "dev:web": "vite",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "format:check": "prettier --check .",
+    "lint:fix": "eslint --fix ."
   },
   "dependencies": {
     "@repo/types": "*",

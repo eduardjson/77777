@@ -3,10 +3,8 @@
   "globalDependencies": ["**/.env.*local"],
   "globalEnv": ["NODE_ENV", "PORT", "DATABASE_URL", "JWT_SECRET", "API_URL", "VITE_API_URL"],
   "tasks": {
-    "format": {
-      "dependsOn": [],
-      "outputs": []
-    },
+    "format": { "dependsOn": [], "outputs": [] },
+    "clean": { "cache": false },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "build/**"],
@@ -21,13 +19,12 @@
       "dependsOn": ["^build"],
       "outputs": []
     },
-    "test": {
-      "dependsOn": ["build"],
-      "outputs": [],
-      "env": ["NODE_ENV"]
-    },
     "type-check": {
       "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["build"],
       "outputs": []
     },
     "generate": {
@@ -35,26 +32,39 @@
       "dependsOn": [],
       "outputs": ["node_modules/.prisma/**", "src/generated/**"]
     },
-    "clean": {
-      "cache": false
-    },
     "@repo/api#dev": {
       "cache": false,
       "persistent": true,
       "env": ["PORT", "DATABASE_URL", "JWT_SECRET"]
+    },
+    "@repo/api#build": {
+      "dependsOn": ["^build", "@repo/api#generate"],
+      "outputs": ["dist/**"]
+    },
+
+    "@repo/api#generate": {
+      "cache": false,
+      "outputs": ["node_modules/.prisma/**", "src/generated/**"]
+    },
+
+    "@repo/api#migrate:dev": {
+      "cache": false,
+      "dependsOn": ["@repo/api#generate"]
+    },
+
+    "@repo/api#db:studio": {
+      "cache": false,
+      "persistent": true
     },
     "@repo/web#dev": {
       "cache": false,
       "persistent": true,
       "env": ["VITE_API_URL"]
     },
-    "@repo/api#build": {
-      "dependsOn": ["^build", "generate"],
-      "outputs": ["dist/**"]
-    },
-    "@repo/api#generate": {
-      "cache": false,
-      "outputs": ["node_modules/.prisma/**", "src/generated/**"]
+    "@repo/web#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "env": ["VITE_API_URL"]
     }
   }
 }

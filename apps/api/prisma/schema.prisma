@@ -18,13 +18,12 @@ generator clientDto {
   dtoSuffix                       = "Dto"
   entityPrefix                    = ""
   entitySuffix                    = "Interface" 
-  reExport                        = "true"
+  reExport                        = "true"      // Убедитесь, что это строка "true"
   fileNamingStyle                 = "kebab"
   classValidation                 = "false"  
   noDependencies                  = "true"     
   outputType                      = "interface"  
 }
-
 generator enums {
   provider = "prisma-enums-generator"
   output   = "../../../packages/types/src/shared/enums.ts"

@@ -1,25 +1,15 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 generator client {
   provider     = "prisma-client"
   output       = "../generated/prisma"
   moduleFormat = "cjs"
 }
-
-
 generator typescript {
   provider = "prisma-generator-typescript-interfaces"
   output   = "../../../packages/types/src/dto/generated.ts"
 }
-
-
 datasource db {
   provider = "postgresql"
 }
-
 model User {
   id        String   @id @default(uuid())
   username  String   @unique @map("user_name")
@@ -38,7 +28,6 @@ model User {
 
   @@map("users")
 }
-
 model Token {
   token  String   @unique
   expires    DateTime
@@ -52,7 +41,6 @@ enum Role {
   ADMIN
   USER
 }
-
 model Product {
   id           String @id @default(uuid())
   title        String
@@ -60,15 +48,13 @@ model Product {
   category     String
   manufacturer String
   imageUrl     String
-  unit         String @default("шт") // Добавляем поле unit
+  unit         String @default("шт") 
   images ProductImage[] 
   
   @@map("products")
   shipmentItems ShipmentItem[]
   stockItems StockItem[]
 }
-
-
 model ProductImage {
   id String @id @default(uuid()) 
   productId String
@@ -82,23 +68,20 @@ model Message {
   userName  String
   text      String
   createdAt DateTime @default(now())
-  attachments Attachment[] // Добавляем связь с вложениями
+  attachments Attachment[]
 }
-
 model Attachment {
   id        String   @id @default(uuid())
   messageId Int
   message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  fileName  String   // Оригинальное имя файла
-  fileSize  Int      // Размер в байтах
-  fileType  String   // MIME тип
-  filePath  String   // Путь к файлу на сервере
+  fileName  String  
+  fileSize  Int      
+  fileType  String  
+  filePath  String   
   uploadedAt DateTime @default(now())
 
   @@map("attachments")
 }
-
-
 model Warehouse {
   id        String   @id @default(uuid())
   name      String   @unique
@@ -111,19 +94,16 @@ model Warehouse {
 
   @@map("warehouses")
 }
-
-// Остатки на складе
 model StockItem {
   id          String   @id @default(uuid())
   productId   String   @map("product_id")
   warehouseId String   @map("warehouse_id")
   quantity    Int      @default(0)
-  
-  // Новые поля для цен и скидки
-  purchasePrice  Float?  @map("purchase_price")   // цена закупки
-  estimatePrice  Float?  @map("estimate_price")   // цена для сметы
-  salePrice      Float?  @map("sale_price")       // цена для продажи
-  discount       Float?  @default(0)              // скидка в процентах
+
+  purchasePrice  Float?  @map("purchase_price")  
+  estimatePrice  Float?  @map("estimate_price")
+  salePrice      Float?  @map("sale_price")       
+  discount       Float?  @default(0)            
   
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -135,7 +115,6 @@ model StockItem {
   @@map("stock_items")
 }
 
-// Объект (куда отгружаем)
 model Object {
   id          String   @id @default(uuid())
   name        String   @unique
@@ -149,7 +128,6 @@ model Object {
   @@map("objects")
 }
 
-// Отгрузка со склада на объект
 model Shipment {
   id          String         @id @default(uuid())
   warehouseId String         @map("warehouse_id")
@@ -165,7 +143,6 @@ model Shipment {
   @@map("shipments")
 }
 
-// Позиции в отгрузке
 model ShipmentItem {
   id         String   @id @default(uuid())
   shipmentId String   @map("shipment_id")
@@ -185,8 +162,6 @@ enum ShipmentStatus {
   COMPLETED
   CANCELLED
 }
-
-
 model Project {
   id          String   @id @default(uuid())
   name        String
@@ -194,12 +169,10 @@ model Project {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  // Связи
   images      ProjectImage[]
   documents   ProjectDocument[]
   estimate    Estimate?
   
-  // Для сортировки
   status      ProjectStatus @default(ACTIVE)
 }
 
@@ -208,13 +181,12 @@ model ProjectImage {
   projectId String
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   
-  data      Bytes   // двоичные данные изображения
+  data      Bytes  
   filename  String
   mimeType  String
   size      Int
   createdAt DateTime @default(now())
   
-  // Порядок отображения
   sortOrder Int @default(0)
 }
 
@@ -223,13 +195,12 @@ model ProjectDocument {
   projectId String
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   
-  data      Bytes   // двоичные данные документа
+  data      Bytes  
   filename  String
-  mimeType  String  // application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document и т.д.
+  mimeType  String 
   size      Int
   createdAt DateTime @default(now())
   
-  // Тип документа
   docType   DocumentType @default(OTHER)
 }
 
@@ -240,8 +211,8 @@ model Estimate {
   
   items       EstimateItem[]
   totalCost   Float   @default(0)
-  laborCost   Float?  // стоимость работ
-  materialsCost Float? // стоимость материалов
+  laborCost   Float?  
+  materialsCost Float? 
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -252,20 +223,17 @@ model EstimateItem {
   estimateId  String
   estimate    Estimate @relation(fields: [estimateId], references: [id], onDelete: Cascade)
   
-  // Связь с товаром (если есть каталог товаров)
   productId   String?
   
-  // Или свободное описание
   name        String
   description String?
   
   quantity    Float
   unit        String   @default("шт")
-  price       Float    // цена за единицу
-  total       Float    // quantity * price
+  price       Float   
+  total       Float   
   
-  // Тип затрат
-  costType    CostType @default(MATERIAL) // MATERIAL или LABOR
+  costType    CostType @default(MATERIAL) 
 }
 
 enum ProjectStatus {
@@ -275,13 +243,13 @@ enum ProjectStatus {
 }
 
 enum DocumentType {
-  SPECIFICATION  // спецификация
-  DRAWING        // чертеж
-  CONTRACT       // договор
-  OTHER          // другое
+  SPECIFICATION 
+  DRAWING       
+  CONTRACT      
+  OTHER         
 }
 
 enum CostType {
-  MATERIAL  // материалы
-  LABOR     // работа
+  MATERIAL 
+  LABOR     
 }

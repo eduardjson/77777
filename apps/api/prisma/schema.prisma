@@ -3,40 +3,82 @@ generator client {
   output       = "../generated/prisma"
   moduleFormat = "cjs"
 }
-generator typescript {
-  provider = "prisma-generator-typescript-interfaces"
-  output   = "../../../packages/types/src/dto/generated.ts"
-}
+// generator typescript {
+//   provider = "prisma-generator-typescript-interfaces"
+//   output   = "../../../packages/types/src/dto/generated.ts"
+// }
+
+// generator nestjsDto {
+//   provider                        = "prisma-types-generator"
+//   output                          = "../../../packages/types/src/generated"
+//   outputToNestJsResourceStructure = "true"    
+//   flatResourceStructure           = "false"
+//   createDtoPrefix                 = "Create"
+//   updateDtoPrefix                 = "Update"
+//   dtoSuffix                       = "Dto"
+//   entityPrefix                    = ""
+//   entitySuffix                     = "Entity"
+//   reExport                        = "true"    
+//   fileNamingStyle                 = "kebab"    
+//   classValidation                 = "true"    
+//   noDependencies                  = "false"  
+// }
+
+// generator enums {
+//   provider = "prisma-enums-generator"
+//   output   = "../../../packages/types/src/generated/enums"
+//   isExport = true
+//   useComma = true
+// }
+
+// generator clientTypes {
+//   provider        = "prisma-types-generator"
+//   output          = "../../../packages/types/src/client"
+//   noDependencies  = "true"     
+//   outputType      = "interface" 
+
+// }
 
 generator nestjsDto {
   provider                        = "prisma-types-generator"
-  output                          = "../../../packages/types/src/generated"
-  outputToNestJsResourceStructure = "true"    
+  output                          = "../../../packages/types/src/backend"
+  outputToNestJsResourceStructure = "true"
   flatResourceStructure           = "false"
   createDtoPrefix                 = "Create"
   updateDtoPrefix                 = "Update"
   dtoSuffix                       = "Dto"
   entityPrefix                    = ""
-  entitySuffix                     = "Entity"
-  reExport                        = "true"    
-  fileNamingStyle                 = "kebab"    
-  classValidation                 = "true"    
-  noDependencies                  = "false"  
+  entitySuffix                    = "Entity"
+  reExport                        = "true"
+  fileNamingStyle                 = "kebab"
+  classValidation                 = "true"     // Включает class-validator
+  noDependencies                  = "false"    // Оставляет зависимости
 }
 
+// Генератор для клиента (чистые интерфейсы)
+generator clientDto {
+  provider                        = "prisma-types-generator"
+  output                          = "../../../packages/types/src/client"
+  outputToNestJsResourceStructure = "true"
+  flatResourceStructure           = "false"
+  createDtoPrefix                 = "Create"
+  updateDtoPrefix                 = "Update"
+  dtoSuffix                       = "Dto"
+  entityPrefix                    = ""
+  entitySuffix                    = "Interface"  // Для отличия от Entity
+  reExport                        = "true"
+  fileNamingStyle                 = "kebab"
+  classValidation                 = "false"      // Отключаем валидацию
+  noDependencies                  = "true"       // Убираем зависимости
+  outputType                      = "interface"  // Генерируем интерфейсы вместо классов
+}
+
+// Генератор для enum'ов (если нужно отдельно)
 generator enums {
   provider = "prisma-enums-generator"
-  output   = "../../../packages/types/src/generated/enums"
+  output   = "../../../packages/types/src/shared/enums"
   isExport = true
   useComma = true
-}
-
-generator clientTypes {
-  provider        = "prisma-types-generator"
-  output          = "../../../packages/types/src/client"
-  noDependencies  = "true"     
-  outputType      = "interface" 
-
 }
 datasource db {
   provider = "postgresql"

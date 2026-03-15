@@ -2,9 +2,9 @@ import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 // Путь к сгенерированным DTO (относительно apps/api)
-const CLIENT_DTO_PATH = join(__dirname, '../../../packages/types/src/client');
-const ENUMS_PATH = '../../../shared/enums'; // Относительный путь от файлов в client
-const ENUMS_FILE_PATH = join(__dirname, '../../../packages/types/src/shared/enums.ts');
+const CLIENT_DTO_PATH = join(__dirname, '../../packages/types/src/client');
+const ENUMS_PATH = '../../shared/enums'; // Относительный путь от файлов в client
+const ENUMS_FILE_PATH = join(__dirname, '../../packages/types/src/shared/enums.ts');
 
 export function deleteUselessComma() {
   console.log('🔧 Checking enums.ts for useless commas...');

@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
-const ENUMS_FILE_PATH = join(__dirname, '../../../packages/types/src/shared/enums.ts');
+const ENUMS_FILE_PATH = join(__dirname, '../../packages/types/src/shared/enums.ts');
 
 function fixEnumsFile() {
   console.log('🔧 Fixing enums.ts file...');

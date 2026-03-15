@@ -34,7 +34,8 @@
   },
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "api",
+    "client"
   ],
   "packageManager": "npm@10.0.0",
   "engines": {

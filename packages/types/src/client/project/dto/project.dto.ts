@@ -1,4 +1,4 @@
-import { ProjectStatus } from '@prisma/client';
+import { ProjectStatus } from '../../../shared/enums';
 
 export interface ProjectDto {
   id: string;

@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role } from '../../../shared/enums';
 
 export interface UserDto {
   id: string;

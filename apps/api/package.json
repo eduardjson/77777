@@ -23,7 +23,8 @@
     "db:seed": "ts-node prisma/seed.ts",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit",
-    "dev:api": "nest start --watch"
+    "dev:api": "nest start --watch",
+    "postgenerate:fix-imports": "ts-node scripts/fix-enum-imports.ts"
   },
   "dependencies": {
     "@repo/types": "file:../../packages/types",

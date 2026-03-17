@@ -161,7 +161,7 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+    <Box sx={{ p: 3, maxWidth: 1400, mx: 'auto' }}>
       {/* Заголовок */}
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 600 }}>
         Панель управления
@@ -232,9 +232,9 @@ export const Dashboard: React.FC = () => {
         </Grid>
       </Paper>
 
-      {/* График прибыли и склад */}
+      {/* График прибыли и склад - по 50% ширины */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={7}>
+        <Grid item xs={12} md={6}>
           <Paper
             elevation={0}
             sx={{
@@ -287,7 +287,7 @@ export const Dashboard: React.FC = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={6}>
           <Paper
             elevation={0}
             sx={{

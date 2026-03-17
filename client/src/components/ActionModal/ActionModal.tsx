@@ -1,11 +1,5 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-} from "@mui/material";
-import { ReactNode } from "react";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { ReactNode } from 'react';
 
 interface IActionModalProps {
   title?: string;

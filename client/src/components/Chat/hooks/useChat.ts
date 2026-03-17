@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../../store';
+import { AppDispatch, RootState } from '../store';
 import {
   addLog,
   clearError,
@@ -78,6 +78,7 @@ export const useChat = () => {
       [dispatch]
     ),
 
+    // Добавляем метод clearLog
     clearLog: useCallback(() => {
       dispatch(clearLog());
     }, [dispatch]),

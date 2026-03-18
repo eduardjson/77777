@@ -6,23 +6,46 @@ import {
   Person as PersonIcon,
   Phone as PhoneIcon,
 } from '@mui/icons-material';
-import { Box, Chip, Typography } from '@mui/material';
+import { Box, Card, Chip, Typography } from '@mui/material';
 import { useParams } from '@tanstack/react-router';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useGetAllUsersQuery } from '../../services';
 
+// Константы для ролей
+const ROLES = {
+  ADMIN: 'ADMIN',
+  USER: 'USER',
+} as const;
+
+// Маппинг ролей для отображения
+const ROLE_DISPLAY = {
+  [ROLES.ADMIN]: 'Администратор',
+  [ROLES.USER]: 'Пользователь',
+} as const;
+
+// Конфигурация полей для InfoItem
+const INFO_FIELDS = [
+  { icon: EmailIcon, label: 'Email', key: 'email' },
+  { icon: PhoneIcon, label: 'Телефон', key: 'phone' },
+  { icon: BadgeIcon, label: 'Username', key: 'username' },
+  { icon: PersonIcon, label: 'Имя', key: 'firstName' },
+  { icon: PersonIcon, label: 'Фамилия', key: 'lastName' },
+  { icon: CalendarIcon, label: 'Зарегистрирован', key: 'createdAt', isDate: true },
+] as const;
+
+// Переиспользуемый компонент для отображения поля с иконкой
 const InfoItem = ({
-  icon,
+  icon: Icon,
   label,
   value,
 }: {
-  icon: React.ReactNode;
+  icon: any;
   label: string;
   value?: string | null;
 }) => (
   <Box className="flex items-start gap-2">
-    <Box className="text-gray-400 min-w-6">{icon}</Box>
+    <Icon fontSize="small" className="text-gray-400 mt-0.5" />
     <Box>
       <Typography variant="body2" className="text-gray-500">
         {label}
@@ -33,28 +56,71 @@ const InfoItem = ({
     </Box>
   </Box>
 );
+
+// Компонент для отображения ролей пользователя
+const UserRoles = ({ roles }: { roles: string[] }) => {
+  const hasAdmin = roles.some((role) => role?.toUpperCase() === ROLES.ADMIN);
+  const hasUser = roles.some((role) => role?.toUpperCase() === ROLES.USER);
+
+  return (
+    <Box className="flex gap-2 flex-wrap items-center">
+      {hasAdmin && (
+        <Chip
+          label={ROLE_DISPLAY[ROLES.ADMIN]}
+          size="small"
+          icon={<AdminIcon />}
+          className="bg-amber-50 text-amber-700 border-amber-200"
+        />
+      )}
+      {hasUser && (
+        <Chip
+          label={ROLE_DISPLAY[ROLES.USER]}
+          size="small"
+          variant="outlined"
+          className="border-green-600"
+        />
+      )}
+    </Box>
+  );
+};
+
 export function EmployeeDetails() {
   const { employeeId } = useParams({ from: '/employees/$employeeId' });
-  const { data } = useGetAllUsersQuery();
+  const { data, isLoading } = useGetAllUsersQuery();
 
-  const user = data?.find((u) => String(u.id) === String(employeeId));
-
-  if (!user) {
+  // Ранний возврат для состояния загрузки
+  if (isLoading) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Typography color="text.secondary">Загрузка… или сотрудник не найден</Typography>
+      <Box className="p-6">
+        <Typography color="text.secondary">Загрузка...</Typography>
       </Box>
     );
   }
 
-  if (!user) return null;
+  const user = data?.find((u) => String(u.id) === String(employeeId));
+
+  // Ранний возврат если пользователь не найден
+  if (!user) {
+    return (
+      <Box className="p-6">
+        <Typography color="text.secondary">Сотрудник не найден</Typography>
+      </Box>
+    );
+  }
 
   const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Пользователь';
   const roles = Array.isArray(user.role) ? user.role : [user.role];
-  const isAdmin = roles.some((role) => role?.toUpperCase?.() === 'ADMIN' || role === 'admin');
+
+  // Форматирование значения для отображения
+  const formatValue = (key: string, value: any) => {
+    if (key === 'createdAt' && value) {
+      return format(new Date(value), 'd MMMM yyyy', { locale: ru });
+    }
+    return value;
+  };
 
   return (
-    <Box className="bg-white flex flex-col gap-6 p-6 relative">
+    <Card className="bg-white flex flex-col gap-6 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
       {/* Шапка с аватаром и именем */}
       <Box className="flex flex-row gap-4 items-start">
         <div className="w-24 h-24 overflow-hidden rounded-sm shrink-0">
@@ -64,10 +130,12 @@ export function EmployeeDetails() {
             className="w-full h-full object-cover"
           />
         </div>
+
         <Box className="flex flex-col gap-2 flex-1">
           <Typography variant="h5" className="font-semibold">
             {fullName}
           </Typography>
+
           <Box className="flex gap-2 flex-wrap items-center">
             <Chip
               label={`@${user.username}`}
@@ -75,48 +143,21 @@ export function EmployeeDetails() {
               variant="outlined"
               className="border-gray-200"
             />
-            {isAdmin && (
-              <Chip
-                label="Администратор"
-                size="small"
-                icon={<AdminIcon />}
-                className="bg-amber-50 text-amber-700 border-amber-200"
-              />
-            )}
-            {roles.map(
-              (role, index) =>
-                role?.toUpperCase?.() === 'USER' && (
-                  <Chip
-                    key={index}
-                    label="Пользователь"
-                    size="small"
-                    variant="outlined"
-                    className="border-green-600"
-                  />
-                )
-            )}
+            <UserRoles roles={roles} />
           </Box>
         </Box>
       </Box>
 
       {/* Информация о пользователе */}
       <Box className="flex flex-col gap-3 mt-2">
-        <InfoItem icon={<EmailIcon fontSize="small" />} label="Email" value={user.email} />
-        <InfoItem icon={<PhoneIcon fontSize="small" />} label="Телефон" value={user.phone} />
-        <InfoItem icon={<BadgeIcon fontSize="small" />} label="Username" value={user.username} />
-        <InfoItem icon={<PersonIcon fontSize="small" />} label="Имя" value={user.firstName} />
-        <InfoItem icon={<PersonIcon fontSize="small" />} label="Фамилия" value={user.lastName} />
-        <InfoItem
-          icon={<CalendarIcon fontSize="small" />}
-          label="Зарегистрирован"
-          value={
-            user.createdAt
-              ? format(new Date(user.createdAt), 'd MMMM yyyy', {
-                  locale: ru,
-                })
-              : undefined
-          }
-        />
+        {INFO_FIELDS.map(({ icon, label, key, isDate }) => (
+          <InfoItem
+            key={key}
+            icon={icon}
+            label={label}
+            value={formatValue(key, user[key as keyof typeof user])}
+          />
+        ))}
       </Box>
 
       {/* ID пользователя */}
@@ -125,6 +166,6 @@ export function EmployeeDetails() {
           ID: {user.id}
         </Typography>
       </Box>
-    </Box>
+    </Card>
   );
 }

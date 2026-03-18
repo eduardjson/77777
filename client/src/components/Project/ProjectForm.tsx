@@ -6,40 +6,10 @@ import {
   TableChart as ExcelIcon,
   PictureAsPdf as PdfIcon,
 } from '@mui/icons-material';
-import {
-  Box,
-  Button,
-  Card,
-  CardMedia,
-  CircularProgress,
-  Divider,
-  Grid,
-  IconButton,
-  List,
-  ListItem,
-  ListItemSecondaryAction,
-  ListItemText,
-  Paper,
-  Tab,
-  Tabs,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Button, CircularProgress, IconButton, TextField, Typography } from '@mui/material';
 import { useNavigate } from '@tanstack/react-router';
 import React, { useEffect, useState } from 'react';
 import { useLazyGetImageBlobQuery } from '../../services';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
-  <div hidden={value !== index} style={{ paddingTop: 16 }}>
-    {value === index && children}
-  </div>
-);
 
 interface EstimateItem {
   id?: string;
@@ -63,25 +33,20 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   loading = false,
 }) => {
   const navigate = useNavigate();
-  const [tabValue, setTabValue] = useState(0);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrls, setImageUrls] = useState<Map<string, string>>(new Map());
 
-  // Файлы
   const [existingImages, setExistingImages] = useState<any[]>([]);
   const [existingDocuments, setExistingDocuments] = useState<any[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newDocuments, setNewDocuments] = useState<File[]>([]);
 
-  // Смета
   const [estimateItems, setEstimateItems] = useState<EstimateItem[]>([]);
   const [laborCost, setLaborCost] = useState(0);
 
-  // Хук для загрузки изображений
   const [fetchImageBlob] = useLazyGetImageBlobQuery();
 
-  // Загружаем данные при изменении initialData
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || '');
@@ -93,28 +58,24 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     }
   }, [initialData]);
 
-  // Загружаем изображения для существующих картинок
   useEffect(() => {
     const loadExistingImages = async () => {
-      if (existingImages.length > 0) {
-        existingImages.forEach(async (image) => {
-          if (!imageUrls.has(image.id)) {
-            try {
-              const blob = await fetchImageBlob(image.id).unwrap();
-              const url = URL.createObjectURL(blob);
-              setImageUrls((prev) => new Map(prev).set(image.id, url));
-            } catch (error) {
-              console.error(`Ошибка загрузки изображения ${image.id}:`, error);
-            }
+      for (const image of existingImages) {
+        if (!imageUrls.has(image.id)) {
+          try {
+            const blob = await fetchImageBlob(image.id).unwrap();
+            const url = URL.createObjectURL(blob);
+            setImageUrls((prev) => new Map(prev).set(image.id, url));
+          } catch (error) {
+            console.error(`Ошибка загрузки изображения ${image.id}:`, error);
           }
-        });
+        }
       }
     };
 
     loadExistingImages();
-  }, [existingImages]);
+  }, [existingImages, fetchImageBlob, imageUrls]);
 
-  // Очистка URL при размонтировании
   useEffect(() => {
     return () => {
       imageUrls.forEach((url) => URL.revokeObjectURL(url));
@@ -181,7 +142,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       formData.append('documents', doc);
     });
 
-    // Добавляем смету
+    // Добавляем смету - ВАЖНО: отправляем как JSON строку
     formData.append(
       'estimate',
       JSON.stringify({
@@ -194,330 +155,273 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   };
 
   const getDocumentIcon = (mimeType: string) => {
-    if (mimeType.includes('pdf')) return <PdfIcon />;
-    if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return <ExcelIcon />;
-    return <DocIcon />;
+    if (mimeType.includes('pdf')) return <PdfIcon className="w-5 h-5" />;
+    if (mimeType.includes('excel') || mimeType.includes('spreadsheet'))
+      return <ExcelIcon className="w-5 h-5" />;
+    return <DocIcon className="w-5 h-5" />;
   };
 
   const totalCost = estimateItems.reduce((sum, item) => sum + item.quantity * item.price, 0);
 
-  // Показываем загрузку, пока initialData загружается
   if (!initialData && loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+      <div className="flex justify-center mt-8">
         <CircularProgress />
-      </Box>
+      </div>
     );
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
-      <Typography variant="h4" gutterBottom>
+    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-6 space-y-6">
+      <Typography variant="h4" className="mb-6">
         {initialData ? 'Редактировать проект' : 'Новый проект'}
       </Typography>
 
-      <Paper sx={{ width: '100%', mb: 2 }}>
-        <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
-          <Tab label="Основная информация" />
-          <Tab label="Медиафайлы" />
-          <Tab label="Смета" />
-        </Tabs>
+      {/* Основная информация */}
+      <div className="space-y-4">
+        <TextField
+          fullWidth
+          label="Название проекта"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          size="small"
+        />
 
-        <Box sx={{ p: 3 }}>
-          <TabPanel value={tabValue} index={0}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Название проекта"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Описание"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  multiline
-                  rows={4}
-                />
-              </Grid>
-            </Grid>
-          </TabPanel>
+        <TextField
+          fullWidth
+          label="Описание"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          multiline
+          rows={3}
+          size="small"
+        />
+      </div>
 
-          <TabPanel value={tabValue} index={1}>
-            <Grid container spacing={4}>
-              {/* Изображения */}
-              <Grid item xs={12} md={6}>
-                <Typography variant="h6" gutterBottom>
-                  Изображения
-                </Typography>
+      {/* Медиафайлы */}
+      <div className="space-y-4">
+        <Typography variant="h6">Медиафайлы</Typography>
 
-                {/* Существующие изображения */}
-                {existingImages.length > 0 && (
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Загруженные изображения ({existingImages.length})
-                    </Typography>
-                    <Grid container spacing={1}>
-                      {existingImages.map((img) => (
-                        <Grid item xs={4} key={img.id}>
-                          <Card>
-                            {imageUrls.has(img.id) ? (
-                              <CardMedia
-                                component="img"
-                                height="100"
-                                image={imageUrls.get(img.id)}
-                                alt={img.filename}
-                                sx={{ objectFit: 'cover' }}
-                              />
-                            ) : (
-                              <Box
-                                sx={{
-                                  height: 100,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  bgcolor: 'grey.200',
-                                }}
-                              >
-                                <CircularProgress size={30} />
-                              </Box>
-                            )}
-                          </Card>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Box>
-                )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Изображения */}
+          <div className="space-y-3">
+            <Typography variant="subtitle1">Изображения</Typography>
 
-                {/* Новые изображения */}
-                <Button
-                  variant="outlined"
-                  component="label"
-                  startIcon={<CloudUploadIcon />}
-                  fullWidth
-                  sx={{ mb: 2 }}
-                >
-                  Загрузить изображения
-                  <input
-                    type="file"
-                    hidden
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
-                </Button>
-
-                <List>
-                  {newImages.map((file, index) => (
-                    <ListItem key={index}>
-                      <ListItemText
-                        primary={file.name}
-                        secondary={`${(file.size / 1024).toFixed(2)} KB`}
-                      />
-                      <ListItemSecondaryAction>
-                        <IconButton edge="end" onClick={() => removeNewImage(index)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
+            {existingImages.length > 0 && (
+              <div>
+                <p className="text-sm text-gray-600 mb-2">Загруженные ({existingImages.length})</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {existingImages.map((img) => (
+                    <div key={img.id} className="border rounded overflow-hidden">
+                      {imageUrls.has(img.id) ? (
+                        <img
+                          src={imageUrls.get(img.id)}
+                          alt={img.filename}
+                          className="w-full h-20 object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-20 bg-gray-100 flex items-center justify-center">
+                          <CircularProgress size={24} />
+                        </div>
+                      )}
+                    </div>
                   ))}
-                </List>
-              </Grid>
+                </div>
+              </div>
+            )}
 
-              {/* Документы */}
-              <Grid item xs={12} md={6}>
-                <Typography variant="h6" gutterBottom>
-                  Документы
-                </Typography>
+            <Button
+              variant="outlined"
+              component="label"
+              startIcon={<CloudUploadIcon />}
+              fullWidth
+              size="small"
+            >
+              Загрузить изображения
+              <input type="file" hidden multiple accept="image/*" onChange={handleImageUpload} />
+            </Button>
 
-                {/* Существующие документы */}
-                {existingDocuments.length > 0 && (
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Загруженные документы ({existingDocuments.length})
-                    </Typography>
-                    <List>
-                      {existingDocuments.map((doc) => (
-                        <ListItem key={doc.id}>
-                          {getDocumentIcon(doc.mimeType)}
-                          <ListItemText
-                            primary={doc.filename}
-                            secondary={`${(doc.size / 1024).toFixed(2)} KB`}
-                            sx={{ ml: 1 }}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Box>
-                )}
+            {newImages.map((file, idx) => (
+              <div key={idx} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                <span className="text-sm truncate flex-1">{file.name}</span>
+                <span className="text-xs text-gray-500 mx-2">
+                  {(file.size / 1024).toFixed(1)} KB
+                </span>
+                <IconButton size="small" onClick={() => removeNewImage(idx)}>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </div>
+            ))}
+          </div>
 
-                {/* Новые документы */}
-                <Button
-                  variant="outlined"
-                  component="label"
-                  startIcon={<CloudUploadIcon />}
-                  fullWidth
-                  sx={{ mb: 2 }}
-                >
-                  Загрузить документы
-                  <input
-                    type="file"
-                    hidden
-                    multiple
-                    accept=".pdf,.doc,.docx,.xls,.xlsx"
-                    onChange={handleDocumentUpload}
-                  />
-                </Button>
+          {/* Документы */}
+          <div className="space-y-3">
+            <Typography variant="subtitle1">Документы</Typography>
 
-                <List>
-                  {newDocuments.map((file, index) => (
-                    <ListItem key={index}>
-                      {getDocumentIcon(file.type)}
-                      <ListItemText
-                        primary={file.name}
-                        secondary={`${(file.size / 1024).toFixed(2)} KB`}
-                        sx={{ ml: 1 }}
-                      />
-                      <ListItemSecondaryAction>
-                        <IconButton edge="end" onClick={() => removeNewDocument(index)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
+            {existingDocuments.length > 0 && (
+              <div>
+                <p className="text-sm text-gray-600 mb-2">
+                  Загруженные ({existingDocuments.length})
+                </p>
+                <div className="space-y-1">
+                  {existingDocuments.map((doc) => (
+                    <div key={doc.id} className="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                      {getDocumentIcon(doc.mimeType)}
+                      <span className="text-sm truncate flex-1">{doc.filename}</span>
+                      <span className="text-xs text-gray-500">
+                        {(doc.size / 1024).toFixed(1)} KB
+                      </span>
+                    </div>
                   ))}
-                </List>
-              </Grid>
-            </Grid>
-          </TabPanel>
+                </div>
+              </div>
+            )}
 
-          <TabPanel value={tabValue} index={2}>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Смета проекта
-              </Typography>
-
-              <TextField
-                label="Стоимость работ"
-                type="number"
-                value={laborCost}
-                onChange={(e) => setLaborCost(Number(e.target.value))}
-                fullWidth
-                sx={{ mb: 3 }}
+            <Button
+              variant="outlined"
+              component="label"
+              startIcon={<CloudUploadIcon />}
+              fullWidth
+              size="small"
+            >
+              Загрузить документы
+              <input
+                type="file"
+                hidden
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx"
+                onChange={handleDocumentUpload}
               />
+            </Button>
 
-              <Typography variant="subtitle1" gutterBottom>
-                Материалы и работы
-              </Typography>
+            {newDocuments.map((file, idx) => (
+              <div key={idx} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {getDocumentIcon(file.type)}
+                  <span className="text-sm truncate">{file.name}</span>
+                </div>
+                <span className="text-xs text-gray-500 mx-2">
+                  {(file.size / 1024).toFixed(1)} KB
+                </span>
+                <IconButton size="small" onClick={() => removeNewDocument(idx)}>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-              {estimateItems.map((item, index) => (
-                <Paper key={item.id || index} sx={{ p: 2, mb: 2 }}>
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} sm={3}>
-                      <TextField
-                        fullWidth
-                        label="Наименование"
-                        value={item.name}
-                        onChange={(e) => handleUpdateEstimateItem(index, 'name', e.target.value)}
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={6} sm={1}>
-                      <TextField
-                        fullWidth
-                        label="Кол-во"
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) =>
-                          handleUpdateEstimateItem(index, 'quantity', Number(e.target.value))
-                        }
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={6} sm={1}>
-                      <TextField
-                        fullWidth
-                        label="Ед."
-                        value={item.unit}
-                        onChange={(e) => handleUpdateEstimateItem(index, 'unit', e.target.value)}
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={6} sm={1.5}>
-                      <TextField
-                        fullWidth
-                        label="Цена"
-                        type="number"
-                        value={item.price}
-                        onChange={(e) =>
-                          handleUpdateEstimateItem(index, 'price', Number(e.target.value))
-                        }
-                        size="small"
-                      />
-                    </Grid>
-                    <Grid item xs={6} sm={1.5}>
-                      <TextField
-                        fullWidth
-                        label="Сумма"
-                        value={item.quantity * item.price}
-                        size="small"
-                        InputProps={{ readOnly: true }}
-                      />
-                    </Grid>
-                    <Grid item xs={8} sm={2}>
-                      <select
-                        value={item.costType}
-                        onChange={(e) =>
-                          handleUpdateEstimateItem(index, 'costType', e.target.value)
-                        }
-                        style={{ width: '100%', padding: 8 }}
-                      >
-                        <option value="MATERIAL">Материал</option>
-                        <option value="LABOR">Работа</option>
-                      </select>
-                    </Grid>
-                    <Grid item xs={4} sm={1}>
-                      <IconButton color="error" onClick={() => handleRemoveEstimateItem(index)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </Grid>
-                  </Grid>
-                </Paper>
-              ))}
+      {/* Смета */}
+      <div className="space-y-4">
+        <Typography variant="h6">Смета</Typography>
 
-              <Button
-                startIcon={<AddIcon />}
-                onClick={handleAddEstimateItem}
-                variant="outlined"
-                sx={{ mt: 2 }}
-              >
-                Добавить позицию
-              </Button>
+        <TextField
+          label="Стоимость работ"
+          type="number"
+          value={laborCost}
+          onChange={(e) => setLaborCost(Number(e.target.value))}
+          fullWidth
+          size="small"
+        />
 
-              <Divider sx={{ my: 3 }} />
+        <div className="space-y-3">
+          {estimateItems.map((item, idx) => (
+            <div key={item.id || idx} className="border rounded p-3 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2">
+                <TextField
+                  label="Наименование"
+                  value={item.name}
+                  onChange={(e) => handleUpdateEstimateItem(idx, 'name', e.target.value)}
+                  size="small"
+                  className="lg:col-span-2"
+                />
 
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Typography variant="h6">
-                  Итого: {(totalCost + laborCost).toLocaleString()} ₽
-                </Typography>
-              </Box>
-            </Box>
-          </TabPanel>
-        </Box>
-      </Paper>
+                <TextField
+                  label="Кол-во"
+                  type="number"
+                  value={item.quantity}
+                  onChange={(e) =>
+                    handleUpdateEstimateItem(idx, 'quantity', Number(e.target.value))
+                  }
+                  size="small"
+                />
 
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                <TextField
+                  label="Ед."
+                  value={item.unit}
+                  onChange={(e) => handleUpdateEstimateItem(idx, 'unit', e.target.value)}
+                  size="small"
+                />
+
+                <TextField
+                  label="Цена"
+                  type="number"
+                  value={item.price}
+                  onChange={(e) => handleUpdateEstimateItem(idx, 'price', Number(e.target.value))}
+                  size="small"
+                />
+
+                <TextField
+                  label="Сумма"
+                  value={item.quantity * item.price}
+                  size="small"
+                  InputProps={{ readOnly: true }}
+                />
+
+                <div className="flex items-center gap-1">
+                  <select
+                    value={item.costType}
+                    onChange={(e) =>
+                      handleUpdateEstimateItem(
+                        idx,
+                        'costType',
+                        e.target.value as 'MATERIAL' | 'LABOR'
+                      )
+                    }
+                    className="flex-1 h-9 border rounded px-2 text-sm bg-white"
+                  >
+                    <option value="MATERIAL">Материал</option>
+                    <option value="LABOR">Работа</option>
+                  </select>
+
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleRemoveEstimateItem(idx)}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <Button
+          startIcon={<AddIcon />}
+          onClick={handleAddEstimateItem}
+          variant="outlined"
+          size="small"
+        >
+          Добавить позицию
+        </Button>
+
+        <div className="border-t pt-4 flex justify-end">
+          <Typography variant="h6">Итого: {(totalCost + laborCost).toLocaleString()} ₽</Typography>
+        </div>
+      </div>
+
+      {/* Кнопки действий */}
+      <div className="flex gap-2 justify-end">
         <Button variant="outlined" onClick={() => navigate({ to: '/projects' })}>
           Отмена
         </Button>
         <Button type="submit" variant="contained" disabled={loading}>
           {loading ? 'Сохранение...' : initialData ? 'Сохранить' : 'Создать'}
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </form>
   );
 };

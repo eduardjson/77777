@@ -23,7 +23,6 @@ import { Route as EmployeesEmployeeIdRouteImport } from './routes/employees/$emp
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as ProjectsNewIndexRouteImport } from './routes/projects/new/index'
-import { Route as ProjectsProjectIdIndexRouteImport } from './routes/projects/$projectId/index'
 import { Route as ProductsEditIndexRouteImport } from './routes/products/edit/index'
 import { Route as ProductsAddIndexRouteImport } from './routes/products/add/index'
 import { Route as ProjectsProjectIdEditRouteImport } from './routes/projects/$projectId/edit'
@@ -98,11 +97,6 @@ const ProjectsNewIndexRoute = ProjectsNewIndexRouteImport.update({
   path: '/projects/new/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProjectsProjectIdIndexRoute = ProjectsProjectIdIndexRouteImport.update({
-  id: '/projects/$projectId/',
-  path: '/projects/$projectId/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProductsEditIndexRoute = ProductsEditIndexRouteImport.update({
   id: '/products/edit/',
   path: '/products/edit/',
@@ -136,7 +130,6 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/products/add/': typeof ProductsAddIndexRoute
   '/products/edit/': typeof ProductsEditIndexRoute
-  '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
   '/projects/new/': typeof ProjectsNewIndexRoute
 }
 export interface FileRoutesByTo {
@@ -156,7 +149,6 @@ export interface FileRoutesByTo {
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/products/add': typeof ProductsAddIndexRoute
   '/products/edit': typeof ProductsEditIndexRoute
-  '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
   '/projects/new': typeof ProjectsNewIndexRoute
 }
 export interface FileRoutesById {
@@ -177,7 +169,6 @@ export interface FileRoutesById {
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/products/add/': typeof ProductsAddIndexRoute
   '/products/edit/': typeof ProductsEditIndexRoute
-  '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
   '/projects/new/': typeof ProjectsNewIndexRoute
 }
 export interface FileRouteTypes {
@@ -199,7 +190,6 @@ export interface FileRouteTypes {
     | '/projects/$projectId/edit'
     | '/products/add/'
     | '/products/edit/'
-    | '/projects/$projectId/'
     | '/projects/new/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -219,7 +209,6 @@ export interface FileRouteTypes {
     | '/projects/$projectId/edit'
     | '/products/add'
     | '/products/edit'
-    | '/projects/$projectId'
     | '/projects/new'
   id:
     | '__root__'
@@ -239,7 +228,6 @@ export interface FileRouteTypes {
     | '/projects/$projectId/edit'
     | '/products/add/'
     | '/products/edit/'
-    | '/projects/$projectId/'
     | '/projects/new/'
   fileRoutesById: FileRoutesById
 }
@@ -260,7 +248,6 @@ export interface RootRouteChildren {
   ProjectsProjectIdEditRoute: typeof ProjectsProjectIdEditRoute
   ProductsAddIndexRoute: typeof ProductsAddIndexRoute
   ProductsEditIndexRoute: typeof ProductsEditIndexRoute
-  ProjectsProjectIdIndexRoute: typeof ProjectsProjectIdIndexRoute
   ProjectsNewIndexRoute: typeof ProjectsNewIndexRoute
 }
 
@@ -364,13 +351,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsNewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/projects/$projectId/': {
-      id: '/projects/$projectId/'
-      path: '/projects/$projectId'
-      fullPath: '/projects/$projectId/'
-      preLoaderRoute: typeof ProjectsProjectIdIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/products/edit/': {
       id: '/products/edit/'
       path: '/products/edit'
@@ -412,7 +392,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectsProjectIdEditRoute: ProjectsProjectIdEditRoute,
   ProductsAddIndexRoute: ProductsAddIndexRoute,
   ProductsEditIndexRoute: ProductsEditIndexRoute,
-  ProjectsProjectIdIndexRoute: ProjectsProjectIdIndexRoute,
   ProjectsNewIndexRoute: ProjectsNewIndexRoute,
 }
 export const routeTree = rootRouteImport

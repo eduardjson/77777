@@ -1,3 +1,2 @@
-export * from "./ProjectDetailPage";
-export * from "./ProjectsPage";
-export * from "./ProjectForm";
+export * from './ProjectForm';
+export * from './ProjectsPage';

@@ -14,13 +14,34 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { MdOutlineClose } from 'react-icons/md';
 import { Slide, toast, ToastContainer } from 'react-toastify';
+import { Message } from '../../types';
 import { useChat } from '../../useChat';
 import { MessageBubble } from './MessageBubble';
 import { truncateFileName } from './utils/chatUtils';
 
+export interface ChatActions {
+  send: (message: any, files?: File[]) => Promise<void>;
+  update: (payload: { id: number; text: string }) => Promise<void>;
+  remove: (payload: { id: number }) => Promise<void>;
+  downloadFile: (fileId: string, fileName: string) => Promise<void>;
+  clearLog: () => void;
+  clearError: () => void;
+}
+
+// Обновите возвращаемый тип в useChat
+export interface UseChatReturn {
+  messages: Message[];
+  log: string | null;
+  isLoading: boolean;
+  error: string | null;
+  uploadProgress: number | null;
+  chatActions: ChatActions;
+}
+
 export const Chat = ({ id, username }: { id: string; username: string }) => {
   const theme = useTheme();
-  const { messages, log, uploadProgress, chatActions } = useChat();
+  // Используем хук с автоочисткой лога через 3 секунды
+  const { messages, log, uploadProgress, chatActions } = useChat(3000);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -32,7 +53,7 @@ export const Chat = ({ id, username }: { id: string; username: string }) => {
   const [showTopGradient, setShowTopGradient] = useState(false);
   const [showBottomGradient, setShowBottomGradient] = useState(false);
 
-  // Логирование
+  // Логирование - теперь без ручной очистки
   useEffect(() => {
     if (!log) return;
     toast.info(log, {
@@ -41,8 +62,8 @@ export const Chat = ({ id, username }: { id: string; username: string }) => {
       hideProgressBar: true,
       transition: Slide,
     });
-    chatActions.clearLog();
-  }, [log, chatActions]);
+    // Убираем chatActions.clearLog() - автоочистка работает в хуке
+  }, [log]);
 
   // Скролл градиенты
   const checkScroll = () => {
